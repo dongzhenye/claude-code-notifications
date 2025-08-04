@@ -3,13 +3,13 @@
     "Notification": [{
       "hooks": [{
         "type": "command",
-        "command": "afplay /System/Library/Sounds/Glass.aiff"
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Sound"
       }]
     }],
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "afplay /System/Library/Sounds/Tink.aiff"
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Glass"
       }]
     }]
   }
