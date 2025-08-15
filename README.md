@@ -1,6 +1,6 @@
-# Claude Code Sound Notifications
+# Claude Code Notifications
 
-Get audio alerts when Claude Code needs your input or completes a task. No more missing responses while working in other windows! This Claude Code sound notification setup helps you stay productive with customizable audio feedback.
+Your one-stop solution for Claude Code notifications. From simple terminal bells to rich system notifications - never miss a response while working in other windows! This comprehensive notification toolkit helps you stay productive with customizable alerts.
 
 ## Table of Contents
 
