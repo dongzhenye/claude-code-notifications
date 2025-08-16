@@ -1,0 +1,24 @@
+{
+  "name": "claude-code-notifications-website",
+  "version": "1.0.0",
+  "description": "Landing page for Claude Code Notifications",
+  "scripts": {
+    "dev": "npx serve public",
+    "deploy": "vercel --prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dongzhenye/claude-code-notifications.git"
+  },
+  "keywords": [
+    "claude",
+    "notifications",
+    "cli",
+    "developer-tools"
+  ],
+  "author": "Zhenye Dong",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0"
+  }
+}

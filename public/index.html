@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- SEO Meta Tags -->
+    <title>Claude Code Notifications - Never Miss Claude's Response Again</title>
+    <meta name="description" content="Elegant notification solutions for Claude Code CLI. Choose from terminal bells to rich desktop alerts. Perfect for developers working with AI assistants.">
+    <meta name="keywords" content="Claude Code, notifications, CLI, terminal, desktop alerts, developer tools, AI assistant">
+    <meta name="author" content="Zhenye Dong">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://claude-code-notifications.vercel.app/">
+    <meta property="og:title" content="Claude Code Notifications - Never Miss Claude's Response">
+    <meta property="og:description" content="Elegant notification solutions for Claude Code CLI. From simple terminal bells to rich desktop alerts.">
+    <meta property="og:image" content="https://claude-code-notifications.vercel.app/og-image.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://claude-code-notifications.vercel.app/">
+    <meta property="twitter:title" content="Claude Code Notifications">
+    <meta property="twitter:description" content="Never miss Claude's response again. Smart notification solutions for Claude Code CLI.">
+    <meta property="twitter:image" content="https://claude-code-notifications.vercel.app/og-image.png">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🔔</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #10b981, #3b82f6);
+            --secondary-gradient: linear-gradient(135deg, #10b981, #3b82f6, #f59e0b);
+            --text-primary: #ffffff;
+            --text-secondary: #8b8b8b;
+            --text-muted: #666;
+            --bg-dark: #0a0a0a;
+            --bg-card: rgba(255, 255, 255, 0.02);
+            --bg-card-hover: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.16);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            text-align: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to bottom, #ffffff 0%, #8b8b8b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero .subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-secondary);
+            margin: 0 auto 40px;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Notification Tiers Section */
+        .tiers-section {
+            padding: 80px 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.03em;
+            background: linear-gradient(to bottom, #ffffff 0%, #8b8b8b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-header p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 32px;
+            position: relative;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(10px);
+        }
+
+        .card:hover {
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
+        }
+
+        .card:first-child {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(99, 102, 241, 0.03));
+        }
+
+        .card:last-child {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(251, 146, 60, 0.03));
+        }
+
+        .card.recommended {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(59, 130, 246, 0.03));
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card.recommended::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            padding: 1px;
+            border-radius: 16px;
+            background: var(--secondary-gradient);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .card.recommended:hover::before {
+            opacity: 1;
+        }
+
+        .card.recommended::after {
+            content: '★';
+            position: absolute;
+            bottom: 60px;
+            right: 20px;
+            font-size: 120px;
+            opacity: 0.03;
+            color: white;
+            transform: rotate(-15deg);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .corner-badge {
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            background: var(--primary-gradient);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 0 16px 0 16px;
+            font-size: 0.65em;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .tier-name {
+            font-size: 2em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .tier-tagline {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            min-height: 24px;
+        }
+
+        .features {
+            flex-grow: 1;
+            margin: 0 -32px;
+            padding: 20px 32px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            font-size: 0.95em;
+            line-height: 1.5;
+        }
+
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            margin-top: 1px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .feature-icon.check {
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .feature-icon.cross {
+            background: rgba(239, 68, 68, 0.15);
+        }
+
+        .feature-icon svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .feature-text {
+            color: #d4d4d4;
+        }
+
+        .check-icon {
+            stroke: #10b981;
+            stroke-width: 3;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cross-icon {
+            stroke: #ef4444;
+            stroke-width: 2.5;
+            fill: none;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .cta-button {
+            background: #1a1a1a;
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            letter-spacing: -0.01em;
+        }
+
+        .cta-button:hover {
+            background: #2a2a2a;
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .recommended .cta-button {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+        }
+
+        .recommended .cta-button:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 80px 0;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            text-align: center;
+        }
+
+        .feature-icon-large {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Installation Section */
+        .installation-section {
+            padding: 80px 0;
+        }
+
+        .code-block {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        footer {
+            padding: 60px 0 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-credit {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            40% {
+                transform: translateX(-50%) translateY(-10px);
+            }
+            60% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
+
+        .scroll-indicator svg {
+            width: 30px;
+            height: 30px;
+            stroke: var(--text-secondary);
+            stroke-width: 2;
+            fill: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div style="max-width: 900px; margin: 0 auto;">
+                <h1>🔔 Claude Code Notifications</h1>
+                <p class="subtitle">Never miss Claude's response again.<br>Smart notification solutions for the Claude Code CLI.</p>
+                
+                <div class="hero-buttons">
+                    <a href="https://github.com/dongzhenye/claude-code-notifications" class="btn btn-primary">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        View on GitHub
+                    </a>
+                    <a href="#installation" class="btn btn-secondary">
+                        Quick Start Guide
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24">
+                <path d="M7 10l5 5 5-5" />
+            </svg>
+        </div>
+    </section>
+
+    <!-- Choose Your Style Section -->
+    <section class="tiers-section" id="choose">
+        <div class="container">
+            <div class="section-header">
+                <h2>Choose Your Notification Style</h2>
+                <p>From simple to sophisticated - pick what fits your workflow</p>
+            </div>
+            
+            <div class="cards-container">
+                <!-- Minimal Tier -->
+                <div class="card">
+                    <div class="card-content">
+                        <div class="tier-name">Minimal</div>
+                        <p class="tier-tagline">Built into Claude Code</p>
+                        
+                        <div class="features">
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">5-second setup</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Works everywhere</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Zero dependencies</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon cross">
+                                    <svg viewBox="0 0 20 20" class="cross-icon">
+                                        <path d="M6 6L14 14M6 14L14 6" stroke-width="2.5" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Same sound for all events</span>
+                            </div>
+                        </div>
+                        
+                        <a href="https://github.com/dongzhenye/claude-code-notifications#-minimal--built-in-simplicity" class="cta-button">Get Started</a>
+                    </div>
+                </div>
+                
+                <!-- Recommended Tier -->
+                <div class="card recommended">
+                    <div class="corner-badge">
+                        For most people
+                    </div>
+                    <div class="card-content">
+                        <div class="tier-name">Recommended</div>
+                        <p class="tier-tagline">Author's daily driver</p>
+                        
+                        <div class="features">
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Only 2 key events</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Hand-picked best sounds</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">No notification fatigue</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon cross">
+                                    <svg viewBox="0 0 20 20" class="cross-icon">
+                                        <path d="M6 6L14 14M6 14L14 6" stroke-width="2.5" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Audio only</span>
+                            </div>
+                        </div>
+                        
+                        <a href="https://github.com/dongzhenye/claude-code-notifications#-recommended--perfect-balance" class="cta-button">Get Started</a>
+                    </div>
+                </div>
+                
+                <!-- Custom Tier -->
+                <div class="card">
+                    <div class="card-content">
+                        <div class="tier-name">Custom</div>
+                        <p class="tier-tagline">Desktop notifications & more</p>
+                        
+                        <div class="features">
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Desktop notifications</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Push notifications</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon check">
+                                    <svg viewBox="0 0 20 20" class="check-icon">
+                                        <path d="M5 10l3 3L15 6" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">Total flexibility</span>
+                            </div>
+                            <div class="feature">
+                                <span class="feature-icon cross">
+                                    <svg viewBox="0 0 20 20" class="cross-icon">
+                                        <path d="M6 6L14 14M6 14L14 6" stroke-width="2.5" />
+                                    </svg>
+                                </span>
+                                <span class="feature-text">5+ minute setup</span>
+                            </div>
+                        </div>
+                        
+                        <a href="https://github.com/dongzhenye/claude-code-notifications#-custom--unlimited-possibilities" class="cta-button">Get Started</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why You'll Love It</h2>
+                <p>Designed for developers who value their focus time</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon-large">⚡</div>
+                    <h3>Instant Setup</h3>
+                    <p>One command and you're ready. No complex configuration needed.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon-large">🎯</div>
+                    <h3>Smart Notifications</h3>
+                    <p>Only alerts you when necessary. No notification fatigue.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon-large">🌍</div>
+                    <h3>Cross-Platform</h3>
+                    <p>Works seamlessly on macOS, Linux, and Windows.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon-large">🛠️</div>
+                    <h3>Fully Customizable</h3>
+                    <p>Create your own notification workflows with custom scripts.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon-large">🔌</div>
+                    <h3>Extensible</h3>
+                    <p>Integrate with Slack, Discord, or any webhook service.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon-large">💡</div>
+                    <h3>Open Source</h3>
+                    <p>MIT licensed. Contribute, fork, and make it your own.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Section -->
+    <section class="installation-section" id="installation">
+        <div class="container">
+            <div class="section-header">
+                <h2>Quick Installation</h2>
+                <p>Get started in under a minute</p>
+            </div>
+            
+            <div style="max-width: 800px; margin: 0 auto;">
+                <h3 style="margin-bottom: 20px; color: var(--text-primary);">Recommended Setup</h3>
+                <div class="code-block">
+                    <pre>curl -sSL https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main/install.sh | bash</pre>
+                </div>
+                
+                <p style="text-align: center; color: var(--text-secondary); margin: 30px 0;">
+                    Or choose from other installation methods in our 
+                    <a href="https://github.com/dongzhenye/claude-code-notifications#-installation" style="color: #10b981;">documentation</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <a href="https://github.com/dongzhenye/claude-code-notifications">GitHub</a>
+                <a href="https://github.com/dongzhenye/claude-code-notifications#-installation">Documentation</a>
+                <a href="https://github.com/dongzhenye/claude-code-notifications/issues">Issues</a>
+                <a href="https://github.com/dongzhenye/claude-code-notifications/blob/main/LICENSE">License</a>
+            </div>
+            
+            <div class="footer-credit">
+                <p>Created with ❤️ by <a href="https://github.com/dongzhenye" style="color: var(--text-secondary);">Zhenye Dong</a></p>
+                <p style="margin-top: 10px;">© 2025 Claude Code Notifications. MIT License.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Simple Analytics (optional) -->
+    <script>
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
