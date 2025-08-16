@@ -25,13 +25,11 @@ SCRIPT_DIR=""
 # Check if script is being piped from curl/wget
 if [ -z "${BASH_SOURCE[0]}" ] || [ ! -f "${BASH_SOURCE[0]}" ]; then
     IS_REMOTE=true
-    echo -e "${BLUE}ℹ Running in remote mode${NC}"
 else
     SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     # Additional check: verify local files exist
     if [ ! -d "$SCRIPT_DIR/recommended" ]; then
         IS_REMOTE=true
-        echo -e "${BLUE}ℹ Local files not found, switching to remote mode${NC}"
     fi
 fi
 
