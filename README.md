@@ -38,9 +38,15 @@ That's it! You'll hear a beep when Claude needs attention.
 
 **Different sounds for different events - the best balance:**
 
-### Option 1: Automatic Setup (Coming Soon)
+### Option 1: Automatic Setup
 ```bash
+# Download and run installer
 curl -sSL https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main/install.sh | bash
+
+# Or clone and run locally
+git clone https://github.com/dongzhenye/claude-code-notifications.git
+cd claude-code-notifications
+./install.sh
 ```
 
 ### Option 2: Manual Setup
