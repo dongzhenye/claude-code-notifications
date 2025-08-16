@@ -1,16 +1,71 @@
 # Claude Code Notifications
 
-Your one-stop solution for Claude Code notifications. From simple terminal bells to rich system notifications - never miss a response while working in other windows!
+🔔 **Never miss Claude's response!** Notification solutions for Claude Code - from terminal bells to desktop alerts.
+
+> Working in another window? Get notified when Claude responds. Choose the complexity that fits your workflow.
 
 ## 🎯 Choose Your Notification Style
 
-We offer three tiers to match your needs:
+<table align="center">
+<tr>
+<td align="center" width="33%" style="padding: 20px;">
 
-| Tier | Complexity | Setup Time | Best For |
-|------|------------|------------|----------|
-| **[Minimal](#minimal-tier)** | ⭐ | 5 seconds | Users who want the simplest solution |
-| **[Recommended](#recommended-tier)** ⭐ | ⭐⭐ | 30 seconds | Most users (default) |
-| **[Custom](#custom-tier)** | ⭐⭐⭐ | 5+ minutes | Power users with specific needs |
+### 🔔 **Minimal**
+
+**Built into Claude Code**
+
+<br>
+
+✅ **5-second setup**  
+✅ Works everywhere  
+❌ Same sound for all  
+
+<br>
+
+**[Get started →](#minimal-tier)**
+
+</td>
+<td align="center" width="33%" style="padding: 20px; border: 2px solid #ffd700;">
+
+### ⭐ **Recommended**
+
+**Author's daily choice**
+
+<br>
+
+✅ Hand-picked best sounds  
+✅ Only 2 key events  
+✅ No notification fatigue  
+✅ **30-second setup**  
+❌ Audio only  
+
+<br>
+
+**🏆 BEST FOR MOST**
+
+**[Get started →](#recommended-tier)**
+
+</td>
+<td align="center" width="33%" style="padding: 20px;">
+
+### 🚀 **Custom**
+
+**Desktop notifications & more**
+
+<br>
+
+✅ Desktop notifications  
+✅ Push notifications  
+✅ Total flexibility  
+❌ 5+ minute setup  
+
+<br>
+
+**[Get started →](#custom-tier)**
+
+</td>
+</tr>
+</table>
 
 ## Why Use This?
 
@@ -21,7 +76,7 @@ Working with Claude Code often involves waiting for responses. Without notificat
 
 ## Minimal Tier
 
-**The simplest possible setup - just one command:**
+**Zero configuration, maximum simplicity:**
 
 ```bash
 claude config set --global preferredNotifChannel terminal_bell
@@ -36,7 +91,7 @@ That's it! You'll hear a beep when Claude needs attention.
 
 ## Recommended Tier ⭐
 
-**Different sounds for different events - the best balance:**
+**Smart notifications without the fatigue:**
 
 ### Option 1: Automatic Setup
 ```bash
