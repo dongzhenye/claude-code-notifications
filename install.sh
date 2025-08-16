@@ -238,45 +238,91 @@ install_recommended() {
 install_custom() {
     echo -e "${BLUE}Custom tier setup${NC}"
     echo
-    echo "Available examples:"
-    echo "1) macOS system notifications (visual + sound)"
-    echo "2) Manual configuration (I'll set it up myself)"
+    echo "Available options:"
+    echo "1) Desktop notifications (macOS) - Visual alerts with project context"
+    echo "2) Manual configuration - Set up your own hooks"
     echo
     
-    read -p "Your choice [2]: " choice
-    choice=${choice:-2}
+    read -p "Your choice [1]: " choice
+    choice=${choice:-1}
     
     case $choice in
         1)
+            if [[ "$PLATFORM" != "macos" ]]; then
+                echo -e "${YELLOW}⚠ Desktop notifications are currently only available for macOS${NC}"
+                echo "Please choose manual configuration for other platforms"
+                install_custom
+                return
+            fi
+            
+            # Make script executable
+            chmod +x "$SCRIPT_DIR/custom/system-notify.macos.sh"
+            
+            # Create configuration with absolute path
+            local notify_script="$SCRIPT_DIR/custom/system-notify.macos.sh"
+            
+            cat > "$SETTINGS_FILE" << EOF
+{
+  "hooks": {
+    "Notification": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$notify_script notification"
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$notify_script stop"
+      }]
+    }]
+  }
+}
+EOF
+            echo -e "${GREEN}✓ Desktop notifications configured${NC}"
             echo
-            echo "To use macOS system notifications, add this to your ~/.claude/settings.json:"
+            echo "Features:"
+            echo "  • Project name auto-detection"
+            echo "  • Status icons (🔔 ✅ ❌)"
+            echo "  • Time stamps on completion"
+            echo "  • Silent by default (no sound overlap)"
             echo
+            echo "Test notification:"
+            echo "  $notify_script test"
+            echo
+            
+            # Check if terminal-notifier is installed
+            if ! command -v terminal-notifier &> /dev/null; then
+                echo -e "${YELLOW}⚠️  Note: terminal-notifier not found${NC}"
+                echo "   Due to macOS Sequoia limitations, notifications may not appear without it."
+                echo "   Install with: brew install terminal-notifier"
+                echo "   See: https://github.com/dongzhenye/claude-code-notifications/issues/5"
+            else
+                echo -e "${GREEN}✓ terminal-notifier detected - notifications will work reliably${NC}"
+            fi
+            ;;
+        2)
+            echo
+            echo "Manual configuration guide:"
+            echo
+            echo "1. Create or edit: ~/.claude/settings.json"
+            echo "2. Available scripts:"
+            echo "   • $SCRIPT_DIR/custom/system-notify.macos.sh"
+            echo
+            echo "Example configuration:"
             cat << 'EOF'
 {
   "hooks": {
     "Notification": [{
       "hooks": [{
         "type": "command",
-        "command": "~/claude-code-notifications/custom/system-notify.macos.sh notification 'Claude Code' 'Needs your input'"
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "~/claude-code-notifications/custom/system-notify.macos.sh stop 'Claude Code' 'Task completed'"
+        "command": "/path/to/your/script notification"
       }]
     }]
   }
 }
 EOF
             echo
-            echo "Make sure the script is executable:"
-            echo "  chmod +x $SCRIPT_DIR/custom/system-notify.macos.sh"
-            ;;
-        2)
-            echo
-            echo "Create or edit: ~/.claude/settings.json"
-            echo "See examples in: $SCRIPT_DIR/custom/"
             echo "Documentation: https://github.com/dongzhenye/claude-code-notifications"
             ;;
     esac
