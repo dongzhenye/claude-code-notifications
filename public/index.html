@@ -427,20 +427,67 @@
             padding: 80px 0;
         }
 
+        .code-wrapper {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+            margin: 24px 0;
+        }
+
         .code-block {
             background: rgba(255, 255, 255, 0.03);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin: 20px 0;
+            border-radius: 10px;
+            padding: 16px 24px;
             overflow-x: auto;
+            flex: 1;
+            display: flex;
+            align-items: center;
         }
 
         .code-block pre {
             color: #10b981;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            line-height: 1.5;
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin: 0;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+        }
+
+        .copy-button {
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: #10b981;
+            padding: 0 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            min-width: 100px;
+            justify-content: center;
+            flex-shrink: 0;
+            height: auto;
+        }
+
+        .copy-button:hover {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .copy-button.copied {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        .copy-button.copied .copy-text {
+            content: 'Copied!';
         }
 
         /* Footer */
@@ -488,6 +535,15 @@
                 width: 100%;
                 max-width: 300px;
             }
+            
+            .code-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .copy-button {
+                width: 100%;
+            }
         }
 
         /* Scroll indicator */
@@ -530,10 +586,6 @@
                 
                 <div class="hero-buttons">
                     <a href="#installation" class="btn btn-primary">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="9 11 12 14 22 4"></polyline>
-                            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"></path>
-                        </svg>
                         Quick Installation
                     </a>
                     <a href="https://github.com/dongzhenye/claude-code-notifications" class="btn btn-secondary">
@@ -761,8 +813,17 @@
             
             <div style="max-width: 800px; margin: 0 auto;">
                 <h3 style="margin-bottom: 20px; color: var(--text-primary);">Recommended Setup</h3>
-                <div class="code-block">
-                    <pre>curl -sSL https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main/install.sh | bash</pre>
+                <div class="code-wrapper">
+                    <div class="code-block">
+                        <pre id="install-command">curl -sSL https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main/install.sh | bash</pre>
+                    </div>
+                    <button class="copy-button" onclick="copyCommand()" title="Copy to clipboard">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"></path>
+                        </svg>
+                        <span class="copy-text">Copy</span>
+                    </button>
                 </div>
                 
                 <p style="text-align: center; color: var(--text-secondary); margin: 30px 0;">
@@ -802,6 +863,46 @@
                 }
             });
         });
+
+        // Copy command function
+        function copyCommand() {
+            const command = document.getElementById('install-command').textContent;
+            const button = document.querySelector('.copy-button');
+            const buttonText = button.querySelector('.copy-text');
+            
+            navigator.clipboard.writeText(command).then(() => {
+                button.classList.add('copied');
+                buttonText.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    button.classList.remove('copied');
+                    buttonText.textContent = 'Copy';
+                }, 2000);
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = command;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    button.classList.add('copied');
+                    buttonText.textContent = 'Copied!';
+                    
+                    setTimeout(() => {
+                        button.classList.remove('copied');
+                        buttonText.textContent = 'Copy';
+                    }, 2000);
+                } catch (err) {
+                    console.error('Failed to copy:', err);
+                }
+                
+                document.body.removeChild(textArea);
+            });
+        }
     </script>
 </body>
 </html>
