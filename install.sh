@@ -144,7 +144,12 @@ select_tier_interactive() {
     echo "4) Exit"
     echo
     
-    read -p "Enter choice [2]: " choice
+    # Read from /dev/tty to handle piped input correctly
+    if [ "$IS_REMOTE" = true ]; then
+        read -p "Enter choice [2]: " choice < /dev/tty
+    else
+        read -p "Enter choice [2]: " choice
+    fi
     choice=${choice:-2}
     
     case $choice in
@@ -183,7 +188,12 @@ handle_backup() {
             echo "3) Cancel"
             echo
             
-            read -p "Your choice [1]: " choice
+            # Read from /dev/tty to handle piped input
+            if [ "$IS_REMOTE" = true ]; then
+                read -p "Your choice [1]: " choice < /dev/tty
+            else
+                read -p "Your choice [1]: " choice
+            fi
             choice=${choice:-1}
             
             case $choice in
@@ -289,7 +299,12 @@ install_custom() {
     echo "2) Manual configuration - Set up your own hooks"
     echo
     
-    read -p "Your choice [1]: " choice
+    # Read from /dev/tty to handle piped input
+    if [ "$IS_REMOTE" = true ]; then
+        read -p "Your choice [1]: " choice < /dev/tty
+    else
+        read -p "Your choice [1]: " choice
+    fi
     choice=${choice:-1}
     
     case $choice in
@@ -450,7 +465,12 @@ main() {
         echo "  Tier: $TIER"
         echo "  Platform: $PLATFORM"
         echo
-        read -p "Proceed? [Y/n]: " confirm
+        # Read from /dev/tty to handle piped input
+        if [ "$IS_REMOTE" = true ]; then
+            read -p "Proceed? [Y/n]: " confirm < /dev/tty
+        else
+            read -p "Proceed? [Y/n]: " confirm
+        fi
         confirm=${confirm:-Y}
         
         if [[ "$confirm" != [Yy]* ]]; then
