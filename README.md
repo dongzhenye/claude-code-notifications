@@ -61,18 +61,20 @@ Edit `~/.claude/settings.json`:
     "Notification": [{
       "hooks": [{
         "type": "command",
-        "command": "afplay /System/Library/Sounds/Glass.aiff"
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Glass"
       }]
     }],
     "Stop": [{
       "hooks": [{
         "type": "command",
-        "command": "afplay /System/Library/Sounds/Tink.aiff"
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Tink"
       }]
     }]
   }
 }
 ```
+
+This example uses a notification script with the `-s` flag to specify different sounds for different events.
 
 **Note**: The `model` field is optional. Only include it if you have a specific model preference configured.
 
@@ -124,6 +126,28 @@ done
 
 ### macOS
 
+Using notification script:
+```json
+{
+  "hooks": {
+    "Notification": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Glass"
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Tink"
+      }]
+    }]
+  }
+}
+```
+
+Or using direct afplay command:
+
 ```json
 {
   "hooks": {
@@ -145,7 +169,29 @@ done
 
 ### Linux
 
-Using ALSA (aplay):
+Using notification script:
+
+```json
+{
+  "hooks": {
+    "Notification": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s message"
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s complete"
+      }]
+    }]
+  }
+}
+```
+
+Or using ALSA (aplay) directly:
+
 ```json
 {
   "hooks": {
@@ -165,7 +211,8 @@ Using ALSA (aplay):
 }
 ```
 
-Using PulseAudio (paplay):
+Or using PulseAudio (paplay):
+
 ```json
 {
   "hooks": {
@@ -199,7 +246,29 @@ paplay /usr/share/sounds/ubuntu/stereo/message.ogg
 
 ### Windows
 
-Using PowerShell system sounds:
+Using notification script:
+
+```json
+{
+  "hooks": {
+    "Notification": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Exclamation"
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/notify.sh -s Asterisk"
+      }]
+    }]
+  }
+}
+```
+
+Or using PowerShell system sounds directly:
+
 ```json
 {
   "hooks": {
@@ -219,7 +288,8 @@ Using PowerShell system sounds:
 }
 ```
 
-Using custom WAV files:
+Or using custom WAV files:
+
 ```json
 {
   "hooks": {
