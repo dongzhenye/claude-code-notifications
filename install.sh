@@ -134,8 +134,66 @@ check_environment() {
     echo
 }
 
+# Check if we can interact with user
+can_interact() {
+    if [ "$IS_REMOTE" = true ]; then
+        # For remote execution, check if /dev/tty is available
+        if [ -c /dev/tty ] 2>/dev/null && command -v tty >/dev/null 2>&1 && tty >/dev/null 2>&1; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        # For local execution, check if stdin is a terminal
+        if [ -t 0 ]; then
+            return 0
+        else
+            return 1
+        fi
+    fi
+}
+
+# Read user input safely
+safe_read() {
+    local prompt="$1"
+    local var_name="$2"
+    local default_value="$3"
+    
+    if [ "$IS_REMOTE" = true ] && [ -c /dev/tty ]; then
+        read -p "$prompt" "$var_name" < /dev/tty
+    else
+        read -p "$prompt" "$var_name"
+    fi
+    
+    # Use default if empty
+    eval "[ -z \"\$$var_name\" ] && $var_name='$default_value'"
+}
+
 # Interactive tier selection
 select_tier_interactive() {
+    # If tier already specified via CLI, skip selection
+    if [ -n "$TIER" ]; then
+        return
+    fi
+    
+    # Check if we can interact
+    if ! can_interact; then
+        echo
+        echo "═══════════════════════════════════════════════════════════"
+        echo "Running in non-interactive mode (no terminal available)"
+        echo "═══════════════════════════════════════════════════════════"
+        echo
+        echo "Using default: Recommended tier ⭐"
+        echo
+        echo "To choose a different tier, run with --tier option:"
+        echo "  curl ... | bash -s -- --tier minimal"
+        echo "  curl ... | bash -s -- --tier recommended"
+        echo "  curl ... | bash -s -- --tier custom"
+        echo
+        TIER="recommended"
+        return
+    fi
+    
     echo "Choose your notification style:"
     echo
     echo "1) Minimal     - Terminal bell only (5 seconds)"
@@ -144,13 +202,7 @@ select_tier_interactive() {
     echo "4) Exit"
     echo
     
-    # Read from /dev/tty to handle piped input correctly
-    if [ "$IS_REMOTE" = true ]; then
-        read -p "Enter choice [2]: " choice < /dev/tty
-    else
-        read -p "Enter choice [2]: " choice
-    fi
-    choice=${choice:-2}
+    safe_read "Enter choice [2]: " choice "2"
     
     case $choice in
         1)
@@ -188,12 +240,7 @@ handle_backup() {
             echo "3) Cancel"
             echo
             
-            # Read from /dev/tty to handle piped input
-            if [ "$IS_REMOTE" = true ]; then
-                read -p "Your choice [1]: " choice < /dev/tty
-            else
-                read -p "Your choice [1]: " choice
-            fi
+            safe_read "Your choice [1]: " choice "1"
             choice=${choice:-1}
             
             case $choice in
@@ -299,13 +346,7 @@ install_custom() {
     echo "2) Manual configuration - Set up your own hooks"
     echo
     
-    # Read from /dev/tty to handle piped input
-    if [ "$IS_REMOTE" = true ]; then
-        read -p "Your choice [1]: " choice < /dev/tty
-    else
-        read -p "Your choice [1]: " choice
-    fi
-    choice=${choice:-1}
+    safe_read "Your choice [1]: " choice "1"
     
     case $choice in
         1)
@@ -465,13 +506,7 @@ main() {
         echo "  Tier: $TIER"
         echo "  Platform: $PLATFORM"
         echo
-        # Read from /dev/tty to handle piped input
-        if [ "$IS_REMOTE" = true ]; then
-            read -p "Proceed? [Y/n]: " confirm < /dev/tty
-        else
-            read -p "Proceed? [Y/n]: " confirm
-        fi
-        confirm=${confirm:-Y}
+        safe_read "Proceed? [Y/n]: " confirm "Y"
         
         if [[ "$confirm" != [Yy]* ]]; then
             echo "Installation cancelled"
