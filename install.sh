@@ -13,10 +13,27 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+REPO_URL="https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main"
 CLAUDE_DIR="$HOME/.claude"
 SETTINGS_FILE="$CLAUDE_DIR/settings.json"
 BACKUP_SUFFIX=".backup.$(date +%Y%m%d_%H%M%S)"
+
+# Detect execution mode (local vs remote)
+IS_REMOTE=false
+SCRIPT_DIR=""
+
+# Check if script is being piped from curl/wget
+if [ -z "${BASH_SOURCE[0]}" ] || [ ! -f "${BASH_SOURCE[0]}" ]; then
+    IS_REMOTE=true
+    echo -e "${BLUE}ℹ Running in remote mode${NC}"
+else
+    SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+    # Additional check: verify local files exist
+    if [ ! -d "$SCRIPT_DIR/recommended" ]; then
+        IS_REMOTE=true
+        echo -e "${BLUE}ℹ Local files not found, switching to remote mode${NC}"
+    fi
+fi
 
 # Default values
 TIER=""
@@ -206,6 +223,42 @@ install_minimal() {
     echo "That's it! You'll hear a beep when Claude needs attention."
 }
 
+# Get configuration file (local or remote)
+get_config_file() {
+    local platform=$1
+    local config_content=""
+    
+    if [ "$IS_REMOTE" = true ]; then
+        # Download from GitHub
+        local config_url="$REPO_URL/recommended/recommended.$platform.json"
+        echo "  Downloading configuration from GitHub..."
+        
+        if command -v curl &> /dev/null; then
+            config_content=$(curl -sSL "$config_url" 2>/dev/null)
+        elif command -v wget &> /dev/null; then
+            config_content=$(wget -qO- "$config_url" 2>/dev/null)
+        else
+            echo -e "${RED}Error: Neither curl nor wget found${NC}"
+            exit 1
+        fi
+        
+        if [ -z "$config_content" ]; then
+            echo -e "${RED}Error: Failed to download configuration${NC}"
+            exit 1
+        fi
+    else
+        # Use local file
+        local config_file="$SCRIPT_DIR/recommended/recommended.$platform.json"
+        if [[ ! -f "$config_file" ]]; then
+            echo -e "${RED}Error: Configuration file not found: $config_file${NC}"
+            exit 1
+        fi
+        config_content=$(cat "$config_file")
+    fi
+    
+    echo "$config_content"
+}
+
 # Install recommended tier
 install_recommended() {
     echo -e "${BLUE}Installing Recommended tier...${NC}"
@@ -213,17 +266,12 @@ install_recommended() {
     # Ensure .claude directory exists
     mkdir -p "$CLAUDE_DIR"
     
-    # Select appropriate config file
-    local config_file="$SCRIPT_DIR/recommended/recommended.$PLATFORM.json"
+    # Get configuration content
+    local config_content
+    config_content=$(get_config_file "$PLATFORM")
     
-    if [[ ! -f "$config_file" ]]; then
-        echo -e "${RED}Error: Configuration file not found: $config_file${NC}"
-        echo "Please ensure you're running from the project directory"
-        exit 1
-    fi
-    
-    # Copy configuration
-    cp "$config_file" "$SETTINGS_FILE"
+    # Write configuration to file
+    echo "$config_content" > "$SETTINGS_FILE"
     echo -e "${GREEN}✓ Configuration installed${NC}"
     echo
     echo "Configuration file: $SETTINGS_FILE"
@@ -255,11 +303,31 @@ install_custom() {
                 return
             fi
             
-            # Make script executable
-            chmod +x "$SCRIPT_DIR/custom/system-notify.macos.sh"
+            # Get or download notification script
+            local notify_script="$CLAUDE_DIR/system-notify.macos.sh"
             
-            # Create configuration with absolute path
-            local notify_script="$SCRIPT_DIR/custom/system-notify.macos.sh"
+            if [ "$IS_REMOTE" = true ]; then
+                # Download notification script
+                echo "  Downloading notification script..."
+                local script_url="$REPO_URL/custom/system-notify.macos.sh"
+                
+                if command -v curl &> /dev/null; then
+                    curl -sSL "$script_url" -o "$notify_script"
+                elif command -v wget &> /dev/null; then
+                    wget -q "$script_url" -O "$notify_script"
+                fi
+                
+                if [ ! -f "$notify_script" ]; then
+                    echo -e "${RED}Error: Failed to download notification script${NC}"
+                    exit 1
+                fi
+            else
+                # Copy from local directory
+                cp "$SCRIPT_DIR/custom/system-notify.macos.sh" "$notify_script"
+            fi
+            
+            # Make script executable
+            chmod +x "$notify_script"
             
             cat > "$SETTINGS_FILE" << EOF
 {
@@ -307,7 +375,11 @@ EOF
             echo
             echo "1. Create or edit: ~/.claude/settings.json"
             echo "2. Available scripts:"
-            echo "   • $SCRIPT_DIR/custom/system-notify.macos.sh"
+            if [ "$IS_REMOTE" = true ]; then
+                echo "   • Download from: $REPO_URL/custom/system-notify.macos.sh"
+            else
+                echo "   • $SCRIPT_DIR/custom/system-notify.macos.sh"
+            fi
             echo
             echo "Example configuration:"
             cat << 'EOF'
