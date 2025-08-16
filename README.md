@@ -33,10 +33,9 @@
 
 <br>
 
-✅ Hand-picked best sounds  
 ✅ Only 2 key events  
+✅ Hand-picked best sounds  
 ✅ No notification fatigue  
-✅ **30-second setup**  
 ❌ Audio only  
 
 <br>

@@ -1,12 +1,14 @@
 # Claude Code 通知系统 - 项目指南
 
 ## 项目概述
-为 Claude Code CLI 提供灵活的通知系统，从简单的声音提醒到丰富的系统通知，满足不同用户的需求。
+🔔 **Never miss Claude's response!** Notification solutions for Claude Code - from terminal bells to desktop alerts.
+
+为 Claude Code CLI 提供多种通知解决方案，从简单的终端提示音到桌面通知，让用户在其他窗口工作时也不会错过 Claude 的响应。
 
 ## 产品定位演进
 - **原始定位**：claude-code-sound-notifications - 专注于声音通知
-- **新定位**：claude-code-notifications - 多模态通知系统
-- **核心理念**：简单的需求用简单的方案，复杂的需求有高级选项
+- **新定位**：claude-code-notifications - 通知解决方案集合
+- **核心理念**：提供三层解决方案，用户按需选择复杂度
 
 ## 项目进展状态
 
@@ -18,7 +20,7 @@
 5. **Issue #3 创建**：RFC - 三层架构设计（2025-08-15）
 6. **Issue #4 创建**：统一安装脚本设计（2025-08-16）
 7. **项目重命名完成**：claude-code-notifications（2025-08-15）
-8. **项目描述更新**：一站式解决方案定位（2025-08-15）
+8. **项目描述更新**：Notification solutions 定位（2025-08-16）
 9. **目录结构实施**：recommended/ 和 custom/ 目录（2025-08-16）
 10. **安装脚本实现**：install.sh 支持交互式和CLI模式（2025-08-16）
 11. **版本发布**：v0.1.0 到 v0.4.0，遵循 semver 规范（2025-08-16）
@@ -83,21 +85,24 @@
 ## 三层架构草案
 
 ### Tier 1: Minimal（极简）
+- **核心价值**：Built into Claude Code（内置支持）
 - **实现**：Claude Code 内置 `terminal_bell`
 - **配置**：`claude config set --global preferredNotifChannel terminal_bell`
-- **特点**：一行命令，零配置
+- **特点**：5秒设置，零依赖
 
 ### Tier 2: Recommended（推荐）⭐ 默认
-- **实现**：不同事件不同声音
+- **核心价值**：Author's daily choice（作者日常使用）
+- **实现**：精选的事件声音映射
 - **配置**：预设的 hooks 配置
-- **特点**：Glass（通知）+ Tink（完成）
-- **注意**：不包含系统通知（避免过于频繁）
+- **特点**：仅2个关键事件，无通知疲劳
+- **声音**：Glass（需要输入）+ Tink（任务完成）
 
 ### Tier 3: Custom（定制）
+- **核心价值**：Desktop notifications & more（桌面通知等高级功能）
 - **实现**：自定义脚本
-- **功能**：系统通知、Webhook、多渠道
-- **特点**：完全可定制
-- **适合**：有特殊需求的用户
+- **功能**：桌面通知、推送通知、Webhook、多渠道
+- **特点**：完全灵活可定制
+- **适合**：需要视觉提醒的用户
 
 ## 开源协作最佳实践
 
