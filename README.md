@@ -1,59 +1,73 @@
 # Claude Code Notifications
 
-Your one-stop solution for Claude Code notifications. From simple terminal bells to rich system notifications - never miss a response while working in other windows! This comprehensive notification toolkit helps you stay productive with customizable alerts.
+Your one-stop solution for Claude Code notifications. From simple terminal bells to rich system notifications - never miss a response while working in other windows!
 
-## Table of Contents
+## 🎯 Choose Your Notification Style
 
-- [Why Use This?](#why-use-this)
-- [Quick Start (1 Command)](#quick-start-1-command)
-- [Advanced: Different Sounds for Different Events](#advanced-different-sounds-for-different-events)
-  - [1. Create Configuration](#1-create-configuration)
-  - [2. Event Types](#2-event-types)
-- [Sound Selection Guide](#sound-selection-guide)
-  - [My Recommendations](#my-recommendations)
-  - [Selection Principles](#selection-principles)
-  - [Other Good Options](#other-good-options)
-- [Test Sounds](#test-sounds)
-- [Cross-Platform Examples](#cross-platform-examples)
-  - [macOS](#macos)
-  - [Linux](#linux)
-  - [Windows](#windows)
-- [Troubleshooting](#troubleshooting)
-- [Resources](#resources)
+We offer three tiers to match your needs:
+
+| Tier | Complexity | Setup Time | Best For |
+|------|------------|------------|----------|
+| **[Minimal](#minimal-tier)** | ⭐ | 5 seconds | Users who want the simplest solution |
+| **[Recommended](#recommended-tier)** ⭐ | ⭐⭐ | 30 seconds | Most users (default) |
+| **[Custom](#custom-tier)** | ⭐⭐⭐ | 5+ minutes | Power users with specific needs |
 
 ## Why Use This?
 
-Working with Claude Code often involves waiting for responses or providing input at various stages. Without sound notifications, you might:
+Working with Claude Code often involves waiting for responses. Without notifications, you might:
+- Miss when Claude needs your input
+- Not notice when tasks complete
+- Waste time constantly checking back
 
-- Miss when Claude needs your permission to proceed
-- Not notice when a long-running task completes
-- Waste time checking back when you could be notified instantly
-- Lose focus switching between windows unnecessarily
+## Minimal Tier
 
-With Claude Code sound notifications, you can:
-- Work in other applications and get alerted when needed
-- Know immediately when tasks complete
-- Distinguish between different types of events with custom sounds
-- Maintain your workflow without constant visual monitoring
-
-## Quick Start (1 Command)
+**The simplest possible setup - just one command:**
 
 ```bash
 claude config set --global preferredNotifChannel terminal_bell
 ```
 
-This enables a simple beep when tasks complete. Great for getting started, but:
-- macOS may require additional terminal sound settings
-- Limited support on Windows WSL
-- Only one sound for all events
+That's it! You'll hear a beep when Claude needs attention.
 
-## Advanced: Different Sounds for Different Events
+✅ Works everywhere  
+✅ Zero configuration  
+⚠️ Same sound for all events  
+⚠️ May need terminal sound enabled on macOS  
 
-Want better control? Use Hooks to configure different sounds for different scenarios.
+## Recommended Tier ⭐
 
-### 1. Create Configuration
+**Different sounds for different events - the best balance:**
 
-Edit `~/.claude/settings.json`:
+### Option 1: Automatic Setup (Coming Soon)
+```bash
+curl -sSL https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main/install.sh | bash
+```
+
+### Option 2: Manual Setup
+Copy the appropriate configuration to `~/.claude/settings.json`:
+
+- **macOS**: [recommended/recommended.macos.json](recommended/recommended.macos.json)
+- **Linux**: [recommended/recommended.linux.json](recommended/recommended.linux.json)  
+- **Windows**: [recommended/recommended.windows.json](recommended/recommended.windows.json)
+
+### What You Get
+- 🔔 **Glass sound** when Claude needs input (gentle alert)
+- ✅ **Tink sound** when Claude completes a response (subtle confirmation)
+- 🎯 Carefully chosen sounds to avoid fatigue
+- 🖥️ Platform-optimized configurations
+
+### Sound Philosophy
+- **High-frequency events** (completion) → Gentle sounds (Tink)
+- **Low-frequency events** (needs input) → Noticeable sounds (Glass)
+
+## Custom Tier
+
+**For users who want full control:**
+
+### Examples
+
+#### System Notifications (macOS)
+Want visual notifications? Check out [custom/system-notify.macos.sh](custom/system-notify.macos.sh)
 
 ```json
 {
@@ -61,232 +75,85 @@ Edit `~/.claude/settings.json`:
     "Notification": [{
       "hooks": [{
         "type": "command",
-        "command": "afplay /System/Library/Sounds/Glass.aiff"
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "afplay /System/Library/Sounds/Tink.aiff"
+        "command": "~/claude-code-notifications/custom/system-notify.macos.sh notification"
       }]
     }]
   }
 }
 ```
 
-**Note**: The `model` field is optional. Only include it if you have a specific model preference configured.
+#### Your Own Scripts
+Create any notification behavior you want:
+- Webhook notifications
+- Multi-channel alerts
+- Conditional logic
+- Integration with other tools
 
-### 2. Event Types
-
-- **Notification**: When Claude needs your input or permission (low frequency)
-- **Stop**: When Claude finishes responding (high frequency)
-
-## Sound Selection Guide
-
-### My Recommendations
-
-- **Need Input**: Glass (bubble sound)
-  - Noticeable enough to grab attention
-  - Since it triggers rarely, a slightly more prominent sound is acceptable
-
-- **Task Complete**: Tink (ding)  
-  - Single syllable, brief and non-intrusive
-  - Since it triggers after every response, must avoid auditory fatigue
-
-### Selection Principles
-
-1. **High-frequency events need gentle sounds**: Task completion happens often, so Tink's single note works well
-2. **Low-frequency events can be more prominent**: Input requests are rare, so Glass can be more attention-grabbing
-3. **Avoid lengthy sounds**: Funk, Submarine, etc. can cause listening fatigue
-
-### Other Good Options
-
-Based on personal preference, you might also try:
-- Morse - Ultra-brief, great for high-frequency events
-- Hero - Pleasant but might be too bold
-- Purr - Soft but might not be noticeable enough
-
-## Test Sounds
+## Testing Sounds
 
 ### macOS
-
 ```bash
-# Test single sound
+# Test recommended sounds
+afplay /System/Library/Sounds/Glass.aiff
 afplay /System/Library/Sounds/Tink.aiff
 
-# Test all available sounds
+# Explore all system sounds
 for sound in Basso Blow Bottle Frog Funk Glass Hero Morse Ping Pop Purr Sosumi Submarine Tink; do 
   echo "Playing $sound:" && afplay "/System/Library/Sounds/$sound.aiff" && sleep 1
 done
 ```
 
-## Cross-Platform Examples
-
-### macOS
-
-```json
-{
-  "hooks": {
-    "Notification": [{
-      "hooks": [{
-        "type": "command",
-        "command": "afplay /System/Library/Sounds/Glass.aiff"
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "afplay /System/Library/Sounds/Tink.aiff"
-      }]
-    }]
-  }
-}
-```
-
 ### Linux
-
-Using ALSA (aplay):
-```json
-{
-  "hooks": {
-    "Notification": [{
-      "hooks": [{
-        "type": "command",
-        "command": "aplay /usr/share/sounds/freedesktop/stereo/message.oga"
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "aplay /usr/share/sounds/freedesktop/stereo/complete.oga"
-      }]
-    }]
-  }
-}
-```
-
-Using PulseAudio (paplay):
-```json
-{
-  "hooks": {
-    "Notification": [{
-      "hooks": [{
-        "type": "command",
-        "command": "paplay /usr/share/sounds/ubuntu/stereo/message.ogg"
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "paplay /usr/share/sounds/ubuntu/stereo/dialog-information.ogg"
-      }]
-    }]
-  }
-}
-```
-
-Test Linux sounds:
 ```bash
-# List available system sounds
-ls /usr/share/sounds/
+# Test with PulseAudio
+paplay /usr/share/sounds/freedesktop/stereo/message.oga
 
-# Test a sound with aplay
+# Test with ALSA
 aplay /usr/share/sounds/freedesktop/stereo/complete.oga
 
-# Test a sound with paplay
-paplay /usr/share/sounds/ubuntu/stereo/message.ogg
+# List available sounds
+ls /usr/share/sounds/
 ```
 
 ### Windows
-
-Using PowerShell system sounds:
-```json
-{
-  "hooks": {
-    "Notification": [{
-      "hooks": [{
-        "type": "command",
-        "command": "powershell.exe -c \"[System.Media.SystemSounds]::Exclamation.Play()\""
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "powershell.exe -c \"[System.Media.SystemSounds]::Asterisk.Play()\""
-      }]
-    }]
-  }
-}
-```
-
-Using custom WAV files:
-```json
-{
-  "hooks": {
-    "Notification": [{
-      "hooks": [{
-        "type": "command",
-        "command": "powershell.exe -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\chimes.wav').PlaySync()\""
-      }]
-    }],
-    "Stop": [{
-      "hooks": [{
-        "type": "command",
-        "command": "powershell.exe -c \"(New-Object Media.SoundPlayer 'C:\\Windows\\Media\\ding.wav').PlaySync()\""
-      }]
-    }]
-  }
-}
-```
-
-Test Windows sounds:
-```bash
+```powershell
 # Test system sounds
-powershell.exe -c "[System.Media.SystemSounds]::Asterisk.Play()"
-powershell.exe -c "[System.Media.SystemSounds]::Exclamation.Play()"
-powershell.exe -c "[System.Media.SystemSounds]::Hand.Play()"
-powershell.exe -c "[System.Media.SystemSounds]::Question.Play()"
+[System.Media.SystemSounds]::Asterisk.Play()
+[System.Media.SystemSounds]::Exclamation.Play()
 
 # List available WAV files
 dir C:\Windows\Media\*.wav
-
-# Test a specific WAV file
-powershell.exe -c "(New-Object Media.SoundPlayer 'C:\Windows\Media\chimes.wav').PlaySync()"
 ```
 
 ## Troubleshooting
 
-### Hearing multiple sounds?
+### Multiple sounds playing?
+1. Clear terminal bell: `claude config set --global preferredNotifChannel none`
+2. Check `~/.claude/settings.json` for duplicate configurations
 
-1. Clear terminal bell setting: `claude config set --global preferredNotifChannel none`
-2. Check for notifications from other apps
-3. Ensure your `~/.claude/settings.json` has proper JSON syntax
+### No sounds?
+1. Check system volume
+2. Test commands directly in terminal
+3. Verify file paths exist
 
-### No sounds playing?
+### Settings not working?
+- Changes take effect immediately
+- Check JSON syntax
+- Ensure editing `~/.claude/settings.json`
 
-1. Check your system volume is not muted
-2. Verify the sound file paths exist on your system
-3. Test the command directly in your terminal
-4. Ensure Claude Code has permission to execute commands
+## Event Types
 
-### Settings not taking effect?
+Claude Code supports these notification events:
 
-- Settings take effect immediately, no restart needed
-- Check for syntax errors in your JSON configuration
-- Make sure you're editing the correct settings file (`~/.claude/settings.json`)
+- **Notification**: When Claude needs your input or permission
+- **Stop**: When Claude finishes responding
 
-## Resources
+## Contributing
 
-- [Claude Code Official Documentation](https://docs.anthropic.com/en/docs/build-with-claude/claude-for-developers)
-- [Claude Code CLI GitHub Repository](https://github.com/anthropics/claude-cli)
-- [Anthropic Developer Documentation](https://docs.anthropic.com/)
-
----
-
-💡 **Pro Tip**: Combine Claude Code sound notifications with your operating system's Do Not Disturb mode for focused work sessions where only Claude can alert you.
+Found a great notification setup? Have ideas for improvements? Contributions welcome!
 
 ## Author
 
-Created by [Zhenye Dong](https://github.com/dongzhenye) ([@dongzhenye](mailto:dongzhenye@gmail.com))
+Created by [Zhenye Dong](https://github.com/dongzhenye)
 
-If you find this helpful, please give it a ⭐ on GitHub!
+If this helps your productivity, please give it a ⭐ on GitHub!
