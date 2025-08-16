@@ -23,26 +23,38 @@
 - **等待社区反馈**：Issue #2 和 #3 需要收集意见（预计等待 3-7 天）
 - **PR #1 状态**：等待架构确定后整合
 
-### 待决策事项（按依赖顺序）
+### 已确定决策 ✅
 
-#### 第一阶段：核心定位确认 ⏳
-1. **项目名称变更**
-   - 倾向方案：claude-code-notifications
-   - 等待 Issue #2 社区反馈
+1. **三层方案命名**：Minimal / Recommended / Custom
+   - Minimal：极简主义设计哲学
+   - Recommended：主观推荐，适合80%用户
+   - Custom：定制化，无高低之分
 
-2. **三层方案命名**
-   - 当前提议：Minimal / Recommended / Personalized
-   - 备选：Basic / Standard / Advanced
-   - 等待 Issue #3 社区反馈
+2. **默认层级**：Recommended
+   - 平衡的解决方案
+   - 开箱即用
 
-#### 第二阶段：架构实施（社区共识后）
-3. **项目重命名执行**
-   - GitHub 仓库重命名
-   - 更新所有文档引用
+3. **目录结构**：
+   ```
+   ├── README.md                    # 包含 Minimal 设置
+   ├── install.sh                  # 统一安装脚本
+   ├── recommended/                # 推荐配置
+   │   ├── recommended.macos.json
+   │   ├── recommended.linux.json
+   │   └── recommended.windows.json
+   └── custom/                     # 自定义示例
+       └── system-notify.macos.sh
+   ```
 
-4. **目录结构创建**
-   - 根据三层架构创建相应目录
-   - 不过度设计，保持简洁
+4. **功能分配**：
+   - 系统通知仅在 Custom 层（避免过于频繁）
+   - Recommended 层只有不同声音
+
+### 待实施事项 ⏳
+
+#### 第二阶段：架构实施
+1. **创建目录结构**
+   - 实施确定的目录设计
 
 5. **标准方案实现**
    - 跨平台通知脚本
@@ -74,11 +86,13 @@
 - **实现**：不同事件不同声音
 - **配置**：预设的 hooks 配置
 - **特点**：Glass（通知）+ Tink（完成）
+- **注意**：不包含系统通知（避免过于频繁）
 
-### Tier 3: Personalized（个性化）
+### Tier 3: Custom（定制）
 - **实现**：自定义脚本
 - **功能**：系统通知、Webhook、多渠道
 - **特点**：完全可定制
+- **适合**：有特殊需求的用户
 
 ## 开源协作最佳实践
 
@@ -96,6 +110,22 @@
 5. 创建 Draft PR：实现标准方案
 6. 迭代改进：根据反馈优化
 7. 最终合并：确认效果后合并
+```
+
+### Git Commit 规范
+- **引用 Issue**：在 commit message 中使用 `#2` 格式自动关联
+- **关闭 Issue**：使用 `fixes #2` 或 `closes #2` 自动关闭
+- **部分实现**：使用 `ref #2` 或 `see #2` 仅关联不关闭
+
+示例：
+```bash
+git commit -m "feat: implement project rename (#2)
+
+- Update repository name to claude-code-notifications
+- Reflect one-stop solution positioning
+- Update documentation
+
+ref #2"
 ```
 
 ### PR 评论模板

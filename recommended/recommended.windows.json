@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Notification": [{
+      "hooks": [{
+        "type": "command",
+        "command": "powershell.exe -c \"[System.Media.SystemSounds]::Exclamation.Play()\""
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "powershell.exe -c \"[System.Media.SystemSounds]::Asterisk.Play()\""
+      }]
+    }]
+  }
+}

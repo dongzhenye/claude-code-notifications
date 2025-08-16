@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Notification": [{
+      "hooks": [{
+        "type": "command",
+        "command": "paplay /usr/share/sounds/freedesktop/stereo/message.oga || aplay /usr/share/sounds/freedesktop/stereo/message.oga 2>/dev/null || echo '\\a'"
+      }]
+    }],
+    "Stop": [{
+      "hooks": [{
+        "type": "command",
+        "command": "paplay /usr/share/sounds/freedesktop/stereo/complete.oga || aplay /usr/share/sounds/freedesktop/stereo/complete.oga 2>/dev/null || echo '\\a'"
+      }]
+    }]
+  }
+}
