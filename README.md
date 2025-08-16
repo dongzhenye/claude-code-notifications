@@ -40,7 +40,7 @@ Ever found yourself:
 **Most users should use the Recommended tier:**
 
 ```bash
-# One-line installation
+# One-line installation (works anywhere - downloads configs automatically)
 curl -sSL https://raw.githubusercontent.com/dongzhenye/claude-code-notifications/main/install.sh | bash
 ```
 
@@ -74,6 +74,7 @@ cd claude-code-notifications
 
 The installer will:
 - ✅ Detect your operating system
+- ✅ Automatically download configurations from GitHub (no cloning needed!)
 - ✅ Apply the recommended configuration
 - ✅ Create a backup of existing settings
 - ✅ Provide desktop notification setup options
