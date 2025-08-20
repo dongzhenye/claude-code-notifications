@@ -560,16 +560,6 @@ EOF
 show_summary() {
     echo
     echo -e "${GREEN}✓ Complete${NC}"
-    echo
-    if [[ "$TIER" == "minimal" ]]; then
-        echo -e "Test: ${GREEN}echo -e \"\\\\a\"${NC}"
-    elif [[ "$TIER" == "custom" ]]; then
-        if [[ "$CUSTOM_FEATURE" == "desktop" ]]; then
-            echo -e "Test: ${GREEN}${CLAUDE_DIR}/system-notify.macos.sh test${NC}"
-        elif [[ "$CUSTOM_FEATURE" == "manual" ]]; then
-            echo "Setup: ~/.claude/settings.json"
-        fi
-    fi
 }
 
 # Main installation flow
