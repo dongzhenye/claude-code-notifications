@@ -211,7 +211,7 @@ select_tier_interactive() {
     
     echo "Choose your notification style:"
     echo
-    echo "1) Minimal     - Terminal bell only (5 seconds)"
+    echo "1) Minimal     - Terminal bell only (5 seconds to set up)"
     echo "2) Recommended - Different sounds for events ⭐"
     echo "3) Custom      - Pick your own features"
     echo "4) Exit"
@@ -286,11 +286,31 @@ handle_backup() {
 install_minimal() {
     echo -e "${BLUE}Installing Minimal tier...${NC}"
     echo
-    echo "Run this command to enable terminal bell:"
+    echo "Enabling terminal bell notifications..."
+    
+    # Try claude config command first, but verify it actually worked
+    if claude config set --global preferredNotifChannel terminal_bell 2>/dev/null && \
+       claude config get preferredNotifChannel >/dev/null 2>&1; then
+        echo -e "${GREEN}✓ Terminal bell enabled via Claude config${NC}"
+    else
+        # Fallback: write directly to settings.json
+        echo "Using settings.json method (claude config doesn't support this key yet)..."
+        
+        # Ensure Claude directory exists
+        mkdir -p "$(dirname "$SETTINGS_FILE")"
+        
+        # Create minimal settings.json with only terminal bell
+        cat > "$SETTINGS_FILE" << 'EOF'
+{
+  "preferredNotifChannel": "terminal_bell"
+}
+EOF
+        echo -e "${GREEN}✓ Terminal bell enabled via settings.json${NC}"
+    fi
+    
     echo
-    echo -e "${GREEN}claude config set --global preferredNotifChannel terminal_bell${NC}"
-    echo
-    echo "That's it! You'll hear a beep when Claude needs attention."
+    echo "You'll now hear a beep when Claude completes tasks."
+    echo -e "Test with: ${GREEN}echo -e \"\\\\a\"${NC}"
 }
 
 # Get configuration file (local or remote)
@@ -477,16 +497,23 @@ show_summary() {
     echo "════════════════════════════════════════"
     echo
     echo "Tier: $TIER"
-    if [[ "$TIER" != "minimal" ]]; then
+    if [[ -f "$SETTINGS_FILE" ]]; then
         echo "Config: $SETTINGS_FILE"
     fi
     if [[ -n "$backup_file" ]]; then
         echo "Backup: $backup_file"
     fi
     echo
-    echo "Test your setup:"
-    echo "  1. Run any Claude Code command"
-    echo "  2. You should hear notifications at different events"
+    if [[ "$TIER" == "minimal" ]]; then
+        echo "Test your setup:"
+        echo "  1. Run any Claude Code command"
+        echo "  2. You should hear a terminal bell when tasks complete"
+        echo -e "  3. Test bell: ${GREEN}echo -e \"\\\\a\"${NC}"
+    else
+        echo "Test your setup:"
+        echo "  1. Run any Claude Code command"
+        echo "  2. You should hear notifications at different events"
+    fi
     echo
     echo "Need help? Visit:"
     echo "  https://github.com/dongzhenye/claude-code-notifications"
@@ -514,8 +541,8 @@ main() {
         exit 1
     fi
     
-    # Confirm installation
-    if [[ "$SKIP_CONFIRM" != true ]] && [[ "$TIER" != "minimal" ]]; then
+    # Confirm installation (all tiers except when skipping)
+    if [[ "$SKIP_CONFIRM" != true ]]; then
         echo
         echo "Ready to install:"
         echo "  Tier: $TIER"
@@ -530,8 +557,8 @@ main() {
         fi
     fi
     
-    # Handle backup for non-minimal tiers
-    if [[ "$TIER" != "minimal" ]]; then
+    # Handle backup - all tiers may now modify files
+    if [[ -f "$SETTINGS_FILE" ]]; then
         handle_backup
     fi
     
@@ -548,10 +575,8 @@ main() {
             ;;
     esac
     
-    # Show summary
-    if [[ "$TIER" != "minimal" ]]; then
-        show_summary
-    fi
+    # Show summary for all tiers
+    show_summary
 }
 
 # Run main function
