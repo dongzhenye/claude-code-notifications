@@ -158,15 +158,30 @@ safe_read() {
     local prompt="$1"
     local var_name="$2"
     local default_value="$3"
+    local input_value=""
     
+    # Temporarily disable set -e for read command
+    set +e
     if [ "$IS_REMOTE" = true ] && [ -c /dev/tty ]; then
-        read -p "$prompt" "$var_name" < /dev/tty
+        read -r -p "$prompt" input_value < /dev/tty
     else
-        read -p "$prompt" "$var_name"
+        read -r -p "$prompt" input_value
+    fi
+    local read_status=$?
+    set -e
+    
+    # Handle read failure (EOF, timeout, etc.)
+    if [ $read_status -ne 0 ]; then
+        eval "$var_name='$default_value'"
+        return 0
     fi
     
     # Use default if empty
-    eval "[ -z \"\$$var_name\" ] && $var_name='$default_value'"
+    if [ -z "$input_value" ]; then
+        eval "$var_name='$default_value'"
+    else
+        eval "$var_name='$input_value'"
+    fi
 }
 
 # Interactive tier selection
@@ -508,7 +523,8 @@ main() {
         echo
         safe_read "Proceed? [Y/n]: " confirm "Y"
         
-        if [[ "$confirm" != [Yy]* ]]; then
+        # Accept Y, y, Yes, yes, or empty (default)
+        if [[ ! "$confirm" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
             echo "Installation cancelled"
             exit 0
         fi
