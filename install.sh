@@ -374,11 +374,9 @@ install_recommended() {
 
 # Install custom tier
 install_custom() {
-    echo -e "${BLUE}Custom tier setup${NC}"
-    echo
-    echo "Available options:"
-    echo "1) Desktop notifications (macOS) - Visual alerts with project context"
-    echo "2) Manual configuration - Set up your own hooks"
+    echo "Custom tier:"
+    echo "1) Desktop notifications"
+    echo "2) Manual setup"
     echo "3) Exit"
     echo
     
@@ -393,15 +391,12 @@ install_custom() {
                 return
             fi
             
-            # Confirm desktop notifications choice with full context
-            echo
-            echo "Ready to install desktop notifications:"
-            echo "  • Platform: $PLATFORM"
-            echo "  • Feature: Visual alerts with project context"
+            # Confirm desktop notifications choice
+            echo "Installing:"
+            echo "  ~/.claude/system-notify.macos.sh"
             if [[ -f "$SETTINGS_FILE" ]]; then
-                echo "  • Will backup: $SETTINGS_FILE"
+                echo "  Backup: settings.json"
             fi
-            echo "  • Will install: Desktop notification script"
             echo
             if [[ "$SKIP_CONFIRM" != true ]]; then
                 safe_read "Continue? [Y/n]: " confirm "Y"
@@ -411,11 +406,11 @@ install_custom() {
                 fi
             fi
             
-            # Handle backup (no additional confirmation needed)
+            # Handle backup
             if [[ -f "$SETTINGS_FILE" ]]; then
                 local backup_file="${SETTINGS_FILE}${BACKUP_SUFFIX}"
                 cp "$SETTINGS_FILE" "$backup_file"
-                echo -e "${GREEN}✓ Backed up to: $backup_file${NC}"
+                echo -e "${GREEN}✓ Backup created${NC}"
             fi
             
             # Set feature type for summary
@@ -465,51 +460,27 @@ install_custom() {
   }
 }
 EOF
-            echo -e "${GREEN}✓ Desktop notifications configured${NC}"
-            echo
-            echo "Features:"
-            echo "  • Project name auto-detection"
-            echo "  • Status icons (🔔 ✅ ❌)"
-            echo "  • Time stamps on completion"
-            echo "  • Silent by default (no sound overlap)"
-            echo
-            echo "Test notification:"
-            echo "  $notify_script test"
-            echo
+            echo -e "${GREEN}✓ Script installed${NC}"
             
-            # Check and optionally install terminal-notifier
+            # Auto-test the notification system  
+            if [[ -x "$notify_script" ]]; then
+                "$notify_script" test >/dev/null 2>&1
+                echo -e "${GREEN}✓ Test sent${NC}"
+            fi
+            
+            # Check terminal-notifier (simplified)
             if ! command -v terminal-notifier &> /dev/null; then
-                echo -e "${YELLOW}⚠️  terminal-notifier not found${NC}"
-                echo "   Desktop notifications need this for reliable delivery on macOS Sequoia"
-                echo
-                
                 if [[ "$SKIP_CONFIRM" != true ]]; then
-                    safe_read "Install terminal-notifier now? [Y/n]: " install_tn "Y"
+                    safe_read "Install terminal-notifier for reliable notifications? [Y/n]: " install_tn "Y"
                     
                     if [[ "$install_tn" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
                         if command -v brew &> /dev/null; then
-                            echo "Installing via Homebrew..."
-                            if brew install terminal-notifier; then
-                                echo -e "${GREEN}✓ terminal-notifier installed successfully${NC}"
-                            else
-                                echo -e "${RED}Failed to install terminal-notifier${NC}"
-                                echo "Please install manually: brew install terminal-notifier"
+                            if brew install terminal-notifier >/dev/null 2>&1; then
+                                echo -e "${GREEN}✓ Dependency installed${NC}"
                             fi
-                        else
-                            echo -e "${RED}Homebrew not found. Please install manually:${NC}"
-                            echo "  1. Install Homebrew: https://brew.sh"
-                            echo "  2. Run: brew install terminal-notifier"
-                            echo "  Or see: https://github.com/dongzhenye/claude-code-notifications/issues/5"
                         fi
-                    else
-                        echo "Skipped installation. Notifications may not work reliably."
-                        echo "Install later with: brew install terminal-notifier"
                     fi
-                else
-                    echo "Auto-install disabled. Install manually: brew install terminal-notifier"
                 fi
-            else
-                echo -e "${GREEN}✓ terminal-notifier detected - notifications will work reliably${NC}"
             fi
             ;;
         2)
@@ -572,49 +543,17 @@ EOF
 # Show installation summary
 show_summary() {
     echo
-    echo "════════════════════════════════════════"
-    echo -e "${GREEN}✅ Installation complete!${NC}"
-    echo "════════════════════════════════════════"
-    echo
-    echo "Tier: $TIER"
-    if [[ -f "$SETTINGS_FILE" ]]; then
-        echo "Config: $SETTINGS_FILE"
-    fi
-    if [[ -n "$backup_file" ]]; then
-        echo "Backup: $backup_file"
-    fi
+    echo -e "${GREEN}✓ Complete${NC}"
     echo
     if [[ "$TIER" == "minimal" ]]; then
-        echo "Test your setup:"
-        echo "  1. Run any Claude Code command"
-        echo "  2. You should hear a terminal bell when tasks complete"
-        echo -e "  3. Test bell: ${GREEN}echo -e \"\\\\a\"${NC}"
+        echo -e "Test: ${GREEN}echo -e \"\\\\a\"${NC}"
     elif [[ "$TIER" == "custom" ]]; then
-        # Custom tier has specific test instructions based on feature
-        echo "Test your setup:"
-        echo "  1. Run any Claude Code command"
-        if [[ -n "$CUSTOM_FEATURE" ]]; then
-            case $CUSTOM_FEATURE in
-                "desktop")
-                    echo "  2. You should see desktop notifications"
-                    echo -e "  3. Test manually: ${GREEN}\$CLAUDE_DIR/system-notify.macos.sh test${NC}"
-                    ;;
-                "manual")
-                    echo "  2. Check if your custom hooks execute"
-                    echo "  3. Verify your settings.json configuration"
-                    ;;
-            esac
-        else
-            echo "  2. Check your custom configuration works"
+        if [[ "$CUSTOM_FEATURE" == "desktop" ]]; then
+            echo -e "Test: ${GREEN}${CLAUDE_DIR}/system-notify.macos.sh test${NC}"
+        elif [[ "$CUSTOM_FEATURE" == "manual" ]]; then
+            echo "Setup: ~/.claude/settings.json"
         fi
-    else
-        echo "Test your setup:"
-        echo "  1. Run any Claude Code command"
-        echo "  2. You should hear notifications at different events"
     fi
-    echo
-    echo "Need help? Visit:"
-    echo "  https://github.com/dongzhenye/claude-code-notifications"
 }
 
 # Main installation flow
