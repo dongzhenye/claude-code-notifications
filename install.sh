@@ -137,8 +137,9 @@ check_environment() {
 # Check if we can interact with user
 can_interact() {
     if [ "$IS_REMOTE" = true ]; then
-        # For remote execution, check if /dev/tty is available
-        if [ -c /dev/tty ] 2>/dev/null && command -v tty >/dev/null 2>&1 && tty >/dev/null 2>&1; then
+        # For remote execution, check if /dev/tty is available for input
+        # Don't check tty command as it may return "not a tty" even when interaction is possible
+        if [ -c /dev/tty ] 2>/dev/null; then
             return 0
         else
             return 1
