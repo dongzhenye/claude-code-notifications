@@ -209,11 +209,10 @@ select_tier_interactive() {
         return
     fi
     
-    echo "Choose your notification style:"
-    echo
-    echo "1) Minimal     - Terminal bell only (5 seconds to set up)"
-    echo "2) Recommended - Different sounds for events ⭐"
-    echo "3) Custom      - Pick your own features"
+    echo "Notification style:"
+    echo "1) Minimal     - Terminal bell"
+    echo "2) Recommended - Sound alerts ⭐"
+    echo "3) Custom      - Advanced options"
     echo "4) Exit"
     echo
     
@@ -284,33 +283,40 @@ handle_backup() {
 
 # Install minimal tier
 install_minimal() {
-    echo -e "${BLUE}Installing Minimal tier...${NC}"
+    # Show what will be installed
+    echo "Installing:"
+    echo "  Terminal bell notifications"
     echo
-    echo "Enabling terminal bell notifications..."
+    
+    if [[ "$SKIP_CONFIRM" != true ]]; then
+        safe_read "Continue? [Y/n]: " confirm "Y"
+        if [[ ! "$confirm" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
+            echo "Installation cancelled"
+            exit 0
+        fi
+    fi
+    
+    # Handle backup if config file exists
+    if [[ -f "$SETTINGS_FILE" ]]; then
+        local backup_file="${SETTINGS_FILE}${BACKUP_SUFFIX}"
+        cp "$SETTINGS_FILE" "$backup_file"
+        echo -e "${GREEN}✓ Backup created${NC}"
+    fi
     
     # Try claude config command first, but verify it actually worked
-    if claude config set --global preferredNotifChannel terminal_bell 2>/dev/null && \
+    if claude config set --global preferredNotifChannel terminal_bell >/dev/null 2>&1 && \
        claude config get preferredNotifChannel >/dev/null 2>&1; then
-        echo -e "${GREEN}✓ Terminal bell enabled via Claude config${NC}"
+        echo -e "${GREEN}✓ Bell configured${NC}"
     else
         # Fallback: write directly to settings.json
-        echo "Using settings.json method (claude config doesn't support this key yet)..."
-        
-        # Ensure Claude directory exists
         mkdir -p "$(dirname "$SETTINGS_FILE")"
-        
-        # Create minimal settings.json with only terminal bell
         cat > "$SETTINGS_FILE" << 'EOF'
 {
   "preferredNotifChannel": "terminal_bell"
 }
 EOF
-        echo -e "${GREEN}✓ Terminal bell enabled via settings.json${NC}"
+        echo -e "${GREEN}✓ Bell configured${NC}"
     fi
-    
-    echo
-    echo "You'll now hear a beep when Claude completes tasks."
-    echo -e "Test with: ${GREEN}echo -e \"\\\\a\"${NC}"
 }
 
 # Get configuration file (local or remote)
@@ -351,25 +357,35 @@ get_config_file() {
 
 # Install recommended tier
 install_recommended() {
-    echo -e "${BLUE}Installing Recommended tier...${NC}"
+    # Show what will be installed
+    echo "Installing:"
+    echo "  Glass sound (input needed)"
+    echo "  Tink sound (task complete)"
+    echo
+    
+    if [[ "$SKIP_CONFIRM" != true ]]; then
+        safe_read "Continue? [Y/n]: " confirm "Y"
+        if [[ ! "$confirm" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
+            echo "Installation cancelled"
+            exit 0
+        fi
+    fi
+    
+    # Handle backup if config file exists
+    if [[ -f "$SETTINGS_FILE" ]]; then
+        local backup_file="${SETTINGS_FILE}${BACKUP_SUFFIX}"
+        cp "$SETTINGS_FILE" "$backup_file"
+        echo -e "${GREEN}✓ Backup created${NC}"
+    fi
     
     # Ensure .claude directory exists
     mkdir -p "$CLAUDE_DIR"
     
-    # Get configuration content
+    # Get configuration content and install
     local config_content
     config_content=$(get_config_file "$PLATFORM")
-    
-    # Write configuration to file
     echo "$config_content" > "$SETTINGS_FILE"
-    echo -e "${GREEN}✓ Configuration installed${NC}"
-    echo
-    echo "Configuration file: $SETTINGS_FILE"
-    echo "Platform: $PLATFORM"
-    echo
-    echo "You'll hear:"
-    echo "  • Glass sound when Claude needs input"
-    echo "  • Tink sound when Claude completes a response"
+    echo -e "${GREEN}✓ Sounds configured${NC}"
 }
 
 # Install custom tier
@@ -578,26 +594,7 @@ main() {
         exit 1
     fi
     
-    # Only confirm for minimal and recommended tiers
-    if [[ "$SKIP_CONFIRM" != true ]] && [[ "$TIER" != "custom" ]]; then
-        echo
-        echo "Ready to install:"
-        echo "  Tier: $TIER"
-        echo "  Platform: $PLATFORM"
-        echo
-        safe_read "Proceed? [Y/n]: " confirm "Y"
-        
-        # Accept Y, y, Yes, yes, or empty (default)
-        if [[ ! "$confirm" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
-            echo "Installation cancelled"
-            exit 0
-        fi
-    fi
-    
-    # Handle backup for non-custom tiers (custom handles its own backup)
-    if [[ "$TIER" != "custom" ]] && [[ -f "$SETTINGS_FILE" ]]; then
-        handle_backup
-    fi
+    # Individual tiers handle their own confirmation and backup now
     
     # Install based on tier
     case $TIER in
