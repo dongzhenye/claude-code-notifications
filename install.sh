@@ -379,6 +379,7 @@ install_custom() {
     echo "Available options:"
     echo "1) Desktop notifications (macOS) - Visual alerts with project context"
     echo "2) Manual configuration - Set up your own hooks"
+    echo "3) Exit"
     echo
     
     safe_read "Your choice [1]: " choice "1"
@@ -390,6 +391,25 @@ install_custom() {
                 echo "Please choose manual configuration for other platforms"
                 install_custom
                 return
+            fi
+            
+            # Confirm desktop notifications choice
+            echo
+            echo "Ready to install:"
+            echo "  Feature: Desktop notifications"
+            echo "  Platform: $PLATFORM"
+            echo
+            if [[ "$SKIP_CONFIRM" != true ]]; then
+                safe_read "Proceed? [Y/n]: " confirm "Y"
+                if [[ ! "$confirm" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
+                    install_custom
+                    return
+                fi
+            fi
+            
+            # Handle backup before installation
+            if [[ -f "$SETTINGS_FILE" ]]; then
+                handle_backup
             fi
             
             # Get or download notification script
@@ -459,6 +479,20 @@ EOF
             fi
             ;;
         2)
+            # Confirm manual configuration choice
+            echo
+            echo "Ready to show manual configuration guide"
+            echo "  Feature: Manual configuration"  
+            echo "  Note: You'll need to set up hooks yourself"
+            echo
+            if [[ "$SKIP_CONFIRM" != true ]]; then
+                safe_read "Continue? [Y/n]: " confirm "Y"
+                if [[ ! "$confirm" =~ ^[Yy]([Ee][Ss])?$|^$ ]]; then
+                    install_custom
+                    return
+                fi
+            fi
+            
             echo
             echo "Manual configuration guide:"
             echo
@@ -485,6 +519,14 @@ EOF
 EOF
             echo
             echo "Documentation: https://github.com/dongzhenye/claude-code-notifications"
+            ;;
+        3)
+            echo "Custom tier cancelled"
+            exit 0
+            ;;
+        *)
+            echo -e "${RED}Invalid choice${NC}"
+            install_custom
             ;;
     esac
 }
@@ -541,8 +583,8 @@ main() {
         exit 1
     fi
     
-    # Confirm installation (all tiers except when skipping)
-    if [[ "$SKIP_CONFIRM" != true ]]; then
+    # Only confirm for minimal and recommended tiers
+    if [[ "$SKIP_CONFIRM" != true ]] && [[ "$TIER" != "custom" ]]; then
         echo
         echo "Ready to install:"
         echo "  Tier: $TIER"
@@ -557,8 +599,8 @@ main() {
         fi
     fi
     
-    # Handle backup - all tiers may now modify files
-    if [[ -f "$SETTINGS_FILE" ]]; then
+    # Handle backup for non-custom tiers (custom handles its own backup)
+    if [[ "$TIER" != "custom" ]] && [[ -f "$SETTINGS_FILE" ]]; then
         handle_backup
     fi
     
